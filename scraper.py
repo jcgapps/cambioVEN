@@ -7,7 +7,6 @@ from datetime import datetime
 CACHE_FILE = "cache.json"
 
 def get_bcv_rates():
-    """Scrapea la página del BCV y obtiene las tasas."""
     url = "https://www.bcv.org.ve/"
     response = requests.get(url, timeout=10)
     response.raise_for_status()
@@ -26,9 +25,7 @@ def get_bcv_rates():
 
     return data
 
-
 def load_cache():
-    """Carga el archivo de caché si existe y es válido para hoy."""
     if not os.path.exists(CACHE_FILE):
         return None
 
@@ -41,17 +38,13 @@ def load_cache():
 
     return None
 
-
 def save_cache(rates):
-    """Guarda los datos en el archivo de caché."""
     today = datetime.now().strftime("%Y-%m-%d")
     cache = {"date": today, "rates": rates}
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
         json.dump(cache, f, ensure_ascii=False, indent=2)
 
-
 def get_rates():
-    """Obtiene las tasas desde caché o desde scraping."""
     rates = load_cache()
     if rates is not None:
         return rates
