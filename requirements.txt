@@ -1,4 +1,4 @@
-flask
-requests
-beautifulsoup4
-gunicorn
+flask==3.1.2
+requests==2.32.3
+beautifulsoup4==4.13.0
+gunicorn==23.0.0
