@@ -18,7 +18,7 @@ def get_bcv_rates():
 
     data = {}
     mapping = {
-        "usd": "USD",
+        "dolar": "USD",
         "euro": "EUR",
         "yuan": "CNY",
         "lira": "TRY",
