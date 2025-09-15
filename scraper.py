@@ -30,7 +30,6 @@ def get_bcv_rates():
             div = soup.find("div", {"id": html_id})
             if div:
                 value = div.find("strong").text.strip()
-                # Convertir a float con formato decimal correcto
                 value = value.replace(".", "").replace(",", ".")
                 data[code] = float(value)
             else:
@@ -46,27 +45,37 @@ def load_cache():
         return None
 
     with open(CACHE_FILE, "r", encoding="utf-8") as f:
-        cache = json.load(f)
-
-    today = datetime.now().strftime("%Y-%m-%d")
-    if cache.get("date") == today:
-        return cache["rates"]
-
-    return None
+        return json.load(f)
 
 
-def save_cache(rates):
-    today = datetime.now().strftime("%Y-%m-%d")
-    cache = {"date": today, "rates": rates}
+def save_cache(rates, prev_usd=None):
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cache = {
+        "date": now,
+        "rates": rates,
+        "prev_usd": prev_usd
+    }
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
         json.dump(cache, f, ensure_ascii=False, indent=2)
 
 
 def get_rates():
-    rates = load_cache()
-    if rates is not None:
-        return rates
+    cache = load_cache()
+    rates = None
+    prev_usd = None
 
+    if cache:
+        today = datetime.now().strftime("%Y-%m-%d")
+        cache_date = cache.get("date", "").split(" ")[0]
+
+        # Si ya tenemos datos de hoy, devolvemos el caché
+        if cache_date == today:
+            return cache
+
+        # Guardamos el USD anterior para referencia
+        prev_usd = cache.get("rates", {}).get("USD")
+
+    # Si no hay datos de hoy, hacemos scraping
     rates = get_bcv_rates()
-    save_cache(rates)
-    return rates
+    save_cache(rates, prev_usd)
+    return load_cache()
