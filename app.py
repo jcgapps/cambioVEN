@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS   # 👈 importar CORS
 from scraper import get_rates, get_usd_history
 
 app = Flask(__name__)
+CORS(app)  # 👈 habilitar CORS para todos los orígenes
 
 # 👇 Esto asegura que jsonify devuelva JSON con indentación
 app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True  
