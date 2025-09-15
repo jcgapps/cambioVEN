@@ -60,6 +60,13 @@ def get_rates():
     today = datetime.now().strftime("%Y-%m-%d")
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # ⚠️ Normalizar rates si viene como string
+    if cache and isinstance(cache.get("rates"), str):
+        try:
+            cache["rates"] = json.loads(cache["rates"])
+        except Exception:
+            cache["rates"] = {}
+
     # Si ya tenemos datos de hoy → devolver caché
     if cache and cache["date"].startswith(today):
         return cache
@@ -84,7 +91,7 @@ def get_rates():
 
     cache = {
         "date": now,
-        "rates": rates,
+        "rates": rates,   # siempre dict, nunca string
         "prev_usd": prev_usd
     }
     save_json(CACHE_FILE, cache)
