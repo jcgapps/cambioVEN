@@ -3,12 +3,18 @@ from bs4 import BeautifulSoup
 import json
 import os
 from datetime import datetime
+import urllib3
 
 CACHE_FILE = "cache.json"
 
+# Desactivar warnings SSL
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 def get_bcv_rates():
     url = "https://www.bcv.org.ve/"
-    response = requests.get(url, timeout=10)
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    response = requests.get(url, headers=headers, timeout=10, verify=False)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
