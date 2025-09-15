@@ -68,24 +68,18 @@ def get_rates():
     rates = get_bcv_rates()
 
     # Valor previo del USD
-    prev_usd = None
-    if history:
-        prev_usd = history[-1]["rates"].get("USD")
+    prev_usd = history[-1]["usd"] if history else None
 
-    # Crear nueva entrada
-    new_entry = {
+    # Registrar en histórico solo USD
+    history.append({
         "date": now,
-        "rates": rates
-    }
-
-    # Guardar en histórico
-    history.append(new_entry)
+        "usd": rates.get("USD")
+    })
 
     # Mantener solo 90 días
     if len(history) > 90:
         history = history[-90:]
 
-    # Guardar histórico y caché
     save_json(HISTORY_FILE, history)
 
     cache = {
@@ -98,6 +92,6 @@ def get_rates():
     return cache
 
 
-def get_history(days=90):
+def get_usd_history(days=90):
     history = load_json(HISTORY_FILE) or []
     return history[-days:]
