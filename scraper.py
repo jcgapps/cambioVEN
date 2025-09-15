@@ -6,6 +6,7 @@ from datetime import datetime
 import urllib3
 
 CACHE_FILE = "cache.json"
+HISTORY_FILE = "history.json"
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def get_bcv_rates():
@@ -40,42 +41,63 @@ def get_bcv_rates():
     return data
 
 
-def load_cache():
-    if not os.path.exists(CACHE_FILE):
+def load_json(file):
+    if not os.path.exists(file):
         return None
-
-    with open(CACHE_FILE, "r", encoding="utf-8") as f:
+    with open(file, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def save_cache(rates, prev_usd=None):
+def save_json(file, data):
+    with open(file, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def get_rates():
+    cache = load_json(CACHE_FILE)
+    history = load_json(HISTORY_FILE) or []
+
+    today = datetime.now().strftime("%Y-%m-%d")
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Si ya tenemos datos de hoy → devolver caché
+    if cache and cache["date"].startswith(today):
+        return cache
+
+    # Obtener valores nuevos
+    rates = get_bcv_rates()
+
+    # Valor previo del USD
+    prev_usd = None
+    if history:
+        prev_usd = history[-1]["rates"].get("USD")
+
+    # Crear nueva entrada
+    new_entry = {
+        "date": now,
+        "rates": rates
+    }
+
+    # Guardar en histórico
+    history.append(new_entry)
+
+    # Mantener solo 90 días
+    if len(history) > 90:
+        history = history[-90:]
+
+    # Guardar histórico y caché
+    save_json(HISTORY_FILE, history)
+
     cache = {
         "date": now,
         "rates": rates,
         "prev_usd": prev_usd
     }
-    with open(CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump(cache, f, ensure_ascii=False, indent=2)
+    save_json(CACHE_FILE, cache)
+
+    return cache
 
 
-def get_rates():
-    cache = load_cache()
-    rates = None
-    prev_usd = None
-
-    if cache:
-        today = datetime.now().strftime("%Y-%m-%d")
-        cache_date = cache.get("date", "").split(" ")[0]
-
-        # Si ya tenemos datos de hoy, devolvemos el caché
-        if cache_date == today:
-            return cache
-
-        # Guardamos el USD anterior para referencia
-        prev_usd = cache.get("rates", {}).get("USD")
-
-    # Si no hay datos de hoy, hacemos scraping
-    rates = get_bcv_rates()
-    save_cache(rates, prev_usd)
-    return load_cache()
+def get_history(days=90):
+    history = load_json(HISTORY_FILE) or []
+    return history[-days:]
