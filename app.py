@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from scraper import get_rates, get_history
+from scraper import get_rates, get_usd_history
 
 app = Flask(__name__)
 
@@ -12,15 +12,15 @@ def history():
     days = request.args.get("days", default=30, type=int)
     if days > 90:
         days = 90
-    return jsonify(get_history(days))
+    return jsonify(get_usd_history(days))
 
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({
         "message": "API de Tasas BCV",
         "endpoints": {
-            "/api/rates": "Última tasa de cambio",
-            "/api/history?days=N": "Histórico (N=7,30,90)"
+            "/api/rates": "Última tasa de cambio (todas las divisas + USD previo)",
+            "/api/history?days=N": "Histórico del USD (N=7,30,90)"
         }
     })
 
