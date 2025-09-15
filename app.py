@@ -2,7 +2,9 @@ from flask import Flask, jsonify, request
 from scraper import get_rates, get_usd_history
 
 app = Flask(__name__)
-app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
+
+# 👇 Esto asegura que jsonify devuelva JSON con indentación
+app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True  
 
 @app.route("/api/rates", methods=["GET"])
 def rates():
