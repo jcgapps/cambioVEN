@@ -1,14 +1,11 @@
-import streamlit as st
+from flask import Flask, jsonify
 from scraper import get_rates
 
-st.set_page_config(page_title="Tasas BCV", page_icon="💱")
+app = Flask(__name__)
 
-st.title("💱 Tasas de Cambio - BCV Venezuela")
+@app.route("/api/rates", methods=["GET"])
+def rates():
+    return jsonify(get_rates())
 
-rates = get_rates()
-
-if rates:
-    for divisa, valor in rates.items():
-        st.metric(label=divisa, value=f"{valor} Bs")
-else:
-    st.error("No se pudieron obtener las tasas del BCV.")
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
