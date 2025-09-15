@@ -7,5 +7,9 @@ app = Flask(__name__)
 def rates():
     return jsonify(get_rates())
 
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "API de Tasas BCV - Usa /api/rates para ver las tasas oficiales"})
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
